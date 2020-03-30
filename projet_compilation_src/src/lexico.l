@@ -32,22 +32,20 @@ extern int yydebug;
 
 LETTRE          [a-zA-Z]
 CHIFFRE         [0-9]
-PONCTUATION     [ !#$%&'()*+,-./:;<=>?@[]^_`{|}~]
-AUTRE           [\"]
-CHAINE_CAR      {LETTRE}|{CHIFFRE}|{PONCTUATION}
-IDF             {LETTRE}({LETTRE}|{CHIIFRE}|_)*
-ENTIER          {CHIFFRE}+
+PONCTUATION     [!#$%&'()*+,-./:;<=>?@[]_`{|}~ ]
+TOUT            [\x20-\x7E]
+CHAINE_CAR      [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E]
+IDF             {LETTRE}({LETTRE}|{CHIFFRE}|_)*
+ENTIERHEXA      0x({CHIFFRE}|[a-fA-F])*
+ENTIER          ({CHIFFRE}+|{ENTIERHEXA})
 CHAINE          "({CHAINE_CAR}|\"|\n)*"
-COMMENTAIRE     //([graph:])*\n
+COMMENTAIRE     "//"({TOUT})*\n
+/* //({CHAINE_CAR}|{AUTRE})*\n */
+/* ^ */
 
 %%
 
 "void"          return TOK_VOID;
-
-
-
-
-
 
 {IDF} {
                 yylval.strval = strdup(yytext);
@@ -62,8 +60,7 @@ COMMENTAIRE     //([graph:])*\n
 
 {CHAINE} {
                 /* A completer : affecter yylval.strval */
-                char tmp[] = strdup(yytext);
-                char* p = tmp;
+                char* p = strdup(yytext);
                 p++;
                 p[strlen(p)-1] = 0;
                 yylval.strval = p;
@@ -71,7 +68,6 @@ COMMENTAIRE     //([graph:])*\n
 }
 
 {COMMENTAIRE} {
-    
 }
 
 
