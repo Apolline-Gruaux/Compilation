@@ -31,11 +31,14 @@ extern int yydebug;
 
 
 LETTRE          [a-zA-Z]
-/* A completer ; fausses definitions pour que lex ne fasse pas d'erreur */
-IDF             A
-ENTIER          0
-CHAINE          A
-COMMENTAIRE     A
+CHIFFRE         [0-9]
+PONCTUATION     [ !#$%&'()*+,-./:;<=>?@[]^_`{|}~]
+AUTRE           [\"]
+CHAINE_CAR      {LETTRE}|{CHIFFRE}|{PONCTUATION}
+IDF             {LETTRE}({LETTRE}|{CHIIFRE}|_)*
+ENTIER          {CHIFFRE}+
+CHAINE          "({CHAINE_CAR}|\"|\n)*"
+COMMENTAIRE     //([graph:])*\n
 
 %%
 
@@ -52,16 +55,23 @@ COMMENTAIRE     A
 }
 
 {ENTIER} {
-                /* A completer : affecter yylval.intval et faire des verifications */                
+                /* A completer : affecter yylval.intval et faire des verifications */   
+                yylval.intval = atoi(yytext);             
                 return TOK_INTVAL;
 }
 
 {CHAINE} {
                 /* A completer : affecter yylval.strval */
+                char tmp[] = strdup(yytext);
+                char* p = tmp;
+                p++;
+                p[strlen(p)-1] = 0;
+                yylval.strval = p;
                 return TOK_STRING;
 }
 
 {COMMENTAIRE} {
+    
 }
 
 
