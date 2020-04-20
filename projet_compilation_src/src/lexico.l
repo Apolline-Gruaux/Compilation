@@ -32,12 +32,19 @@ extern int yydebug;
 
 LETTRE          [a-zA-Z]
 CHIFFRE         [0-9]
-PONCTUATION     [!#$%&'()*+,-./:;<=>?@[]_`{|}~ ]
-TOUT            [\x20-\x7E]
-CHAINE_CAR      [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E]
 IDF             {LETTRE}({LETTRE}|{CHIFFRE}|_)*
-ENTIERHEXA      0x({CHIFFRE}|[a-fA-F])*
-ENTIER          ({CHIFFRE}+|{ENTIERHEXA})
+
+TOUT            [\x20-\x7E]
+CHIFFRE_NON_NUL [1-9]
+PONCTUATION     [!#$%&'()*+,-./:;<=>?@[]_`{|}~ ]
+SIGNE				"-"|""
+
+
+
+ENTIER_HEXA      {SIGNE}"0x"({CHIFFRE}|[a-fA-F])*
+ENTIER          {SIGNE}({CHIFFRE}+|{ENTIER_HEXA})
+
+CHAINE_CAR      [\x20-\x21]|[\x23-\x5B]|[\x5D-\x7E]
 CHAINE          "({CHAINE_CAR}|\"|\n)*"
 COMMENTAIRE     "//"({TOUT})*\n
 /* //({CHAINE_CAR}|{AUTRE})*\n */
