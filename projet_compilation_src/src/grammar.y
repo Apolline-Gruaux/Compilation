@@ -11,7 +11,7 @@
 #include "common.h"
 #include "mips_inst.h"
 
-
+#include "registers.h"
 
 /* Global variables */
 
@@ -94,13 +94,64 @@ program:
         ;
 
 listdeclnonnull:
-            { $$ = NULL; }
+           	 { $$ = NULL; }
         ;
 
 maindecl:
-            { $$ = NULL; }
+           	 { $$ = NULL; }
         ;
 
+listdecl:
+			{ $$ = NULL; }
+		;
+
+vardecl :
+			{ $$ = NULL; }
+		;
+
+ident : 
+			{ $$ = NULL; }
+		;
+
+type : 
+			{ $$ = NULL; }
+		;
+
+listtypedecl : 
+			{ $$ = NULL; }
+		;
+
+decl : 
+			{ $$ = NULL; }
+		;
+
+listinst : 
+			{ $$ = NULL; }
+		;
+
+lisinstnonull :
+			{ $$ = NULL; }
+		;
+
+inst : 
+			{ $$ = NULL; }
+		;
+
+block : 
+			{ $$ = NULL; }
+		;
+
+expr : 
+			{ $$ = NULL; }
+		;
+
+listparamprint : 
+			{ $$ = NULL; }
+		;
+
+paramprint : 
+			{ $$ = NULL; }
+		;
 
 %%
 

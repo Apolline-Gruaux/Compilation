@@ -94,8 +94,6 @@ COMMENTAIRE     "//"({TOUT})*\n
 "<="			return TOK_LE;
 
 
-/* faut -il rajouter les TOK_INDENT et TOK_INTVAL?  */
-
 {IDF} {
                 yylval.strval = strdup(yytext);
                 return TOK_IDENT;
