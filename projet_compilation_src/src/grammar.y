@@ -101,7 +101,7 @@ listdeclnonnull:
         {
             $$ = $1;
         }
-        |   listdeclnonnull vardecl
+        | listdeclnonnull vardecl
         {
             $$ = make_node(NODE_DECLS, 2, $1, $2);
         }
@@ -144,68 +144,108 @@ type:
         {
             $$ = make_node(NODE_TYPE, 1, TYPE_INT);
         }
-        |   TOK_BOOL
+        | TOK_BOOL
         {
             $$ = make_node(NODE_TYPE, 1, TYPE_BOOL);
         }
-        |   TOK_VOID{
+        | TOK_VOID{
             $$ = make_node(NODE_TYPE, 1, TYPE_VOID);
         }
 		;
 
-listtypedecl : 
-			{ $$ = NULL; }
+listtypedecl: 
+		decl
+        | listtypedecl TOK_COMMA decl
 		;
 
-decl : 
-			{ $$ = NULL; }
+decl: 
+		ident
+        | ident TOK_AFFECT expr
 		;
 
-listinst : 
-			{ $$ = NULL; }
+listinst: 
+		listinstnonnull
+        |
 		;
 
-lisinstnonull :
-			{ $$ = NULL; }
+lisinstnonull:
+		inst
+        | listinstnonnull inst
 		;
 
-inst : 
-			{ $$ = NULL; }
+inst: 
+		expr TOK_MUL expr
+        | expr TOK_DIV expr
+        | expr TOK_PLUS expr
+        | expr TOK_MINUS expr
+        | expr TOK_MOD expr
+        | expr TOK_LT expr
+        | expr TOK_GT expr
+        | TOK_MINUS expr %prec TOK_UMINUS
+        | expr TOK_GE expr
 		;
 
-block : 
+block: 
 		TOK_LACC listdecl listinst TOK_RACC
         {
             $$ = make_node(NODE_BLOCK, 2, $2, $3);
         }
 		;
 
-// A completer
-expr : 
-		TOK_INTVAL
+expr: 
+        expr TOK_MUL expr
+        | expr TOK_DIV expr
+        | expr TOK_PLUS expr
+        | expr TOK_MINUS expr
+        | expr TOK_MOD expr
+        | expr TOK_LT expr
+        | expr TOK_GT expr
+        | TOK_MINUS expr %prec TOK_UMINUS
+        | expr TOK_GE expr
+        | expr TOK_LE expr
+        | expr TOK_EQ expr
+        | expr TOK_NE expr
+        | expr TOK_AND expr
+        | expr TOK_OR expr
+        | expr TOK_BAND expr
+        | expr TOK_BOR expr
+        | expr TOK_BXOR expr
+        | expr TOK_SRL expr
+        | expr TOK_SRA expr
+        | expr TOK_SLL expr
+        | TOK_NOT expr
         {
-            $$ = make_node(NODE_INTVAL, 0);
+            $$ = make_node(NODE_NOT, 1, $2);
         }
-        |   TOK_TRUE
+        | TOK_BNOT expr
         {
-            $$ = make_node(NODE_BOOLVAL, 1, 1);
+            $$ = make_node(NODE_BNOT, 1, $2);
         }
-        |   TOK_FALSE
-        {
-            $$ = make_node(NODE_BOOLVAL, 1, 0);
-        }
-        |   TOK_STRING
-        {
-            $$ = make_node(NODE_STRINGVAL, 0);
-        }
-        |   ident
-        {
-            $$ = $1;
-        }
-        |   TOK_LPAR expr TOK_RPAR
+        | TOK_LPAR expr TOK_RPAR
         {
             $$ = $2;
         }
+        | ident TOK_AFFECT expr
+        {
+            $$ = make_node(NODE_AFFECT, 2, $1, $3);
+        }
+        | TOK_INTVAL
+        {
+            $$ = make_node(NODE_INTVAL, 0);
+        }
+        | TOK_TRUE
+        {
+            $$ = make_node(NODE_BOOLVAL, 1, 1);
+        }
+        | TOK_FALSE
+        {
+            $$ = make_node(NODE_BOOLVAL, 1, 0);
+        }
+        | ident
+        {
+            $$ = $1;
+        }
+
 		;
 
 listparamprint : 
@@ -213,7 +253,7 @@ listparamprint :
         {
             $$ = make_node(NODE_LIST, 2, $1, $3);
         }
-        |   paramprint
+        | paramprint
         {
             $$ = $1;
         }
@@ -224,7 +264,7 @@ paramprint :
         {
             $$ = $1;
         }
-        |   TOK_STRING
+        | TOK_STRING
         {
             $$ = make_node(NODE_STRINGVAL, 0);
         }
