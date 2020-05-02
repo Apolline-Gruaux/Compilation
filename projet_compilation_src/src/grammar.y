@@ -15,6 +15,8 @@
 
 /* Global variables */
 
+#define NO_MEMORY "ERROR : OUT OF MEMORY"
+
 /* A completer */
 extern bool stop_after_syntax;
 extern bool stop_after_verif;
@@ -28,6 +30,7 @@ extern int yylineno;
 void yyerror(node_t * program_root, char * s);
 void analyse_tree(node_t root);
 node_t make_node(node_nature nature, int nops, ...);
+node_t new_node();
 /* A completer */
 
 %}
@@ -94,27 +97,60 @@ program:
         ;
 
 listdeclnonnull:
-           	 { $$ = NULL; }
+        vardecl
+        {
+            $$ = $1;
+        }
+        |   listdeclnonnull vardecl
+        {
+            $$ = make_node(NODE_DECLS, 2, $1, $2);
+        }
         ;
 
 maindecl:
-           	 { $$ = NULL; }
+        type ident TOK_LPAR TOK_RPAR block
+        {
+            $$ = make_node(NODE_FUNC, 3, $1, $2, $5);
+        }
         ;
 
 listdecl:
-			{ $$ = NULL; }
+        listdeclnonnull
+        {
+            $$ =$1;
+        }
+        |
+        {
+            $$ = NULL;
+        }
 		;
 
-vardecl :
-			{ $$ = NULL; }
+vardecl:
+        type listtypedecl TOK_SEMICOL
+        {
+            $$ = make_node(NODE_DECLS, 2, $1, $2);
+        }
 		;
 
-ident : 
-			{ $$ = NULL; }
+ident: 
+		TOK_IDENT
+        {
+            $$ = make_node(NODE_IDENT, 0);
+        }
 		;
 
-type : 
-			{ $$ = NULL; }
+type: 
+		TOK_INT
+        {
+            $$ = make_node(NODE_TYPE, 1, TYPE_INT);
+        }
+        |   TOK_BOOL
+        {
+            $$ = make_node(NODE_TYPE, 1, TYPE_BOOL);
+        }
+        |   TOK_VOID{
+            $$ = make_node(NODE_TYPE, 1, TYPE_VOID);
+        }
 		;
 
 listtypedecl : 
@@ -138,19 +174,60 @@ inst :
 		;
 
 block : 
-			{ $$ = NULL; }
+		TOK_LACC listdecl listinst TOK_RACC
+        {
+            $$ = make_node(NODE_BLOCK, 2, $2, $3);
+        }
 		;
 
+// A completer
 expr : 
-			{ $$ = NULL; }
+		TOK_INTVAL
+        {
+            $$ = make_node(NODE_INTVAL, 0);
+        }
+        |   TOK_TRUE
+        {
+            $$ = make_node(NODE_BOOLVAL, 1, 1);
+        }
+        |   TOK_FALSE
+        {
+            $$ = make_node(NODE_BOOLVAL, 1, 0);
+        }
+        |   TOK_STRING
+        {
+            $$ = make_node(NODE_STRINGVAL, 0);
+        }
+        |   ident
+        {
+            $$ = $1;
+        }
+        |   TOK_LPAR expr TOK_RPAR
+        {
+            $$ = $2;
+        }
 		;
 
 listparamprint : 
-			{ $$ = NULL; }
+		listparamprint TOK_COMMA paramprint
+        {
+            $$ = make_node(NODE_LIST, 2, $1, $3);
+        }
+        |   paramprint
+        {
+            $$ = $1;
+        }
 		;
 
 paramprint : 
-			{ $$ = NULL; }
+		ident
+        {
+            $$ = $1;
+        }
+        |   TOK_STRING
+        {
+            $$ = make_node(NODE_STRINGVAL, 0);
+        }
 		;
 
 %%
@@ -158,8 +235,81 @@ paramprint :
 /* A completer et/ou remplacer avec d'autres fonctions */
 node_t make_node(node_nature nature, int nops, ...) {
     va_list ap;
+    node_t node = new_node();
+    if(node == NULL)
+    {
+        yyerror(&node, NO_MEMORY)
+    }
+    node->lineno = yylineno;
+    node->nature = nature;
 
-    return NULL;
+    switch(nature){
+
+        case(NODE_BOOLVAL):
+            va_start(ap, nops);
+            node->value = va_arg(ap, int64_t);
+            va_end(ap);
+            break;
+        
+        case(NODE_IDENT):
+            node->ident = yylval.strval;
+            break;
+        
+        case(NODE_INTVAL):
+            node->intval = yylval.intval;
+            break;
+        
+        case(NODE_STRINGVAL):
+            node->str = yylval.strval;
+            break;
+        
+        case(NODE_TYPE):
+            va_start(ap, nops);
+            node->type = va_arg(ap, NODE_TYPE);
+            va_end(ap);
+            break;
+
+        default:
+            node->nops = nops;
+            node->opr = malloc(nops * sizeof(node_t));
+            if(node->opr == NULL)
+            {
+                yyerror(&node, NO_MEMORY);
+            }
+
+            va_start(ap, nops);
+            for(int i = 0; i < nops; i++)
+            {
+                node->opr[i] = va_args(ap, node_t);
+            }
+            va_end(ap);
+
+            break;
+
+    }
+
+    return node;
+}
+
+
+
+node_t new_node(){
+    node_t node = malloc(sizeof(node_t));
+    node->type = TYPE_NONE;
+    node->nature = NONE;
+    node->opr = NULL;
+    node->decl_node = NULL;
+    node->ident = NULL;
+    node->str = NULL;
+    node->global_decl = false;
+    node->value = 0;
+    node->offset = 0;
+    node->lineno = 0;
+    node->stack_size = 0;
+    node->nops = 0;
+    node->node_num = 0;
+
+    return node;
 }
 
 
