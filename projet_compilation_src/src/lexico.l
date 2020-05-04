@@ -115,6 +115,7 @@ COMMENTAIRE     "//"({TOUT})*\n
 }
 
 {COMMENTAIRE} {
+                
 }
 
 
