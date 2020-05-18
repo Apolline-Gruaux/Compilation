@@ -34,7 +34,7 @@ char * getInfile(int argc, char ** argv){
             }
         }
     }
-    return -1;
+    return NULL;
 }
 
 void parse_args(int argc, char ** argv) {
@@ -48,7 +48,7 @@ void parse_args(int argc, char ** argv) {
     syntaxicAnalysis = false;
     verificationAnalysis = false;
     infile = getInfile(argc, argv);
-    if(infile == -1){
+    if(infile == NULL){
         fprintf(stderr, "Erreur, pas de fichier source\n");
         exit(-1);
     }
