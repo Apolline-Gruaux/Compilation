@@ -22,6 +22,10 @@ extern bool stop_after_syntax;
 extern bool stop_after_verif;
 extern char * infile;
 extern char * outfile;
+extern int trace;
+extern int registers;
+extern bool syntaxicAnalysis;
+extern bool verificationAnalysis;
 
 /* prototypes */
 int yylex(void);

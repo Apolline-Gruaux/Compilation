@@ -14,12 +14,131 @@
 
 extern char * infile;
 extern char * outfile;
+volatile int trace;
+volatile int registers;
+volatile bool syntaxicAnalysis;
+volatile bool verificationAnalysis;
 /* A completer */
 
+char * getInfile(int argc, char ** argv){
+    int i = 1;
+    // printf("Recherche nom fichier\n");
+    for(i; i < argc; i++){
+        // printf("%d\n", i);
+        if (argv[0][i] != '-' && strlen(argv[i]) >= 3){
+            // printf("Première condition\n");
+            if(argv[i][strlen(argv[i])-1] == 'c' && argv[i][strlen(argv[i])-2] == '.'){
+                // printf("%c%c\n", argv[i][strlen(argv[i])-2], argv[i][strlen(argv[i])-1]);
+                // printf("Deuxième condition | %s\n", argv[i]);
+                return argv[i];
+            }
+        }
+    }
+    return -1;
+}
 
 void parse_args(int argc, char ** argv) {
-    /* A corriger et completer */
-    infile = argv[1];
+    int cmpNbArgc = 1;      // va comparer le nombre d'arguments/options traités par rapports au nombre d'arguments en entrées
+    int tmpInt;
+    char* tmpChar;
+
+    outfile = DEFAULT_OUTFILE;
+    trace = DEFAULT_TRACE_LEVEL;
+    registers = DEFAULT_MAX_REGS;
+    syntaxicAnalysis = false;
+    verificationAnalysis = false;
+    infile = getInfile(argc, argv);
+    if(infile == -1){
+        fprintf(stderr, "Erreur, pas de fichier source\n");
+        exit(-1);
+    }
+    cmpNbArgc++;
+
+    int opt = getopt(argc, argv, "bo:t:r:svh");
+
+    while(opt != -1){
+        switch (opt)
+        {
+        case 'b':
+            if(argc == 2){
+                printf("#########################################################\n#               Compilateur MiniC : MinAA               #\n#       Créé par Axel Boujon et Apolline Gruaux         #\n#########################################################\n");
+            }
+            else{
+                fprintf(stderr, "Erreur, l'option b ne peut être utilisée que seule et sans nom de fichier source\n");
+                exit(-1);
+            }
+            break;
+        case 'o':
+            tmpChar = optarg;
+            if(strcmp(tmpChar, "") != 0){
+                outfile = tmpChar;
+                cmpNbArgc += 2;
+            }
+            else{
+                fprintf(stderr, "Erreur, nom du fichier de sortie vide\n");
+                exit(-1);
+            }
+            break;
+        case 't':
+            tmpInt = atoi(optarg);
+            if(tmpInt >=0 && tmpInt <= 5 && strlen(optarg) == 1){
+                trace = tmpInt;
+                cmpNbArgc += 2;
+            }
+            else{
+                fprintf(stderr, "Nombre de traces incorrect [0-5]\n");
+                exit(-1);
+            }
+            break;
+        case 'r':
+            tmpInt = atoi(optarg);
+            if(tmpInt >=4 && tmpInt <= 8 && strlen(optarg) == 1){
+                registers = tmpInt;
+                cmpNbArgc += 2;
+            }
+            else{
+                fprintf(stderr, "Nombre de registres incorrect [4-8]\n");
+                exit(-1);
+            }
+            break;
+        case 's':
+            if(verificationAnalysis == true){
+                fprintf(stderr, "Erreur, les arguments s et v sont incompatibles\n");
+                exit(-1);
+            }
+            else{
+                syntaxicAnalysis = true;
+                cmpNbArgc++;
+            }
+            break;
+        case 'v':
+            if(syntaxicAnalysis == true){
+                fprintf(stderr, "Erreur, les arguments s et v sont incompatibles\n");
+                exit(-1);
+            }
+            else{
+                verificationAnalysis = true;
+                cmpNbArgc++;
+            }
+            break;
+        case 'h':
+            printf("Liste des options:\n-b : Affiche une bannière indiquant le nom du compilateur et des membres du binôme\n-o <filename> : Définit le nom du fichier assembleur produit (défaut : out.s).\n-t <int> : Définit le niveau de trace à utiliser entre 0 et 5 (0 = pas de trace ; 5 = toutes les traces. defaut = 0).\n-r <int> : Définit le nombre maximum de registres à utiliser, entre 4 et 8 (défaut : 8).\n-s : Arrêter la compilation après l’analyse syntaxique (défaut = non).\n-v : Arrêter la compilation après la passe de vérifications (défaut = non).\n-h : Afficher la liste des options (fonction d’usage) et arrêter le parsing des arguments.\n");
+            exit(0);
+            break;
+        default:
+            break;
+        }
+        
+        opt = getopt(argc, argv, "bo:t:r:svh");
+    }
+    // printf("%s\n", infile);
+    if(cmpNbArgc == argc){
+        exit(0);
+    }
+    else{
+        fprintf(stderr, "Erreur, trop d'arguments dans la ligne de commande\n");
+        exit(-1);
+    }
 }
 
 
