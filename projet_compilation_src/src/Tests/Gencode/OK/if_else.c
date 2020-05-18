@@ -1,0 +1,8 @@
+void main() {
+	if (true) {	
+		print("true");
+	}
+	else{
+		print("false");
+	}
+}
