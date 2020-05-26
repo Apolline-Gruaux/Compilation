@@ -18,8 +18,6 @@
 #define NO_MEMORY "ERROR : OUT OF MEMORY"
 
 /* A completer */
-extern bool stop_after_syntax;
-extern bool stop_after_verif;
 extern char * infile;
 extern char * outfile;
 extern int trace;
@@ -472,10 +470,25 @@ node_t new_node(){
 
 /* A completer */
 void analyse_tree(node_t root) {
-    if (!stop_after_syntax) {
+    if (!syntaxicAnalysis) {
         // Appeler la passe 1
+        if (trace > 1) {
+			printf("Analyse du fichier\n");
+		}
 
-        if (!stop_after_verif) {
+        set_max_registers(registers);
+		push_global_context();
+
+		if (root->opr[0]) {
+			// analyse_tree_rec_glob(root->opr[0]);
+		}
+
+		// analyse_tree_rec_func(root->opr[1]);
+		pop_context();
+		if (trace > 2) {
+			dump_tree(root, "apres_passe_1.dot");
+		}
+        if (!verificationAnalysis) {
             create_program(); 
             // Appeler la passe 2
 
