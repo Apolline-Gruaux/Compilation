@@ -10,6 +10,7 @@
 #include "defs.h"
 #include "common.h"
 #include "mips_inst.h"
+#include "verification.h"
 
 #include "registers.h"
 
@@ -479,11 +480,8 @@ void analyse_tree(node_t root) {
         set_max_registers(registers);
 		push_global_context();
 
-		if (root->opr[0]) {
-			// analyse_tree_rec_glob(root->opr[0]);
-		}
+		//  effectuer l'analyse grâce aux fonctions de verification.h
 
-		// analyse_tree_rec_func(root->opr[1]);
 		pop_context();
 		if (trace > 2) {
 			dump_tree(root, "apres_passe_1.dot");
